@@ -15,13 +15,10 @@ app.get('/',(req,res)=>{
 app.get('/api/courses',(req,res)=>{
     res.send([courses]);
 });
-
+// ADD
 app.post('/api/courses',(req,res)=> {
-    const schema ={
-        name: Joi.string().min(3).required()
-    };
-    const  result =Joi.validate(req.body,schema);
-    if(result.error) {
+    const { error } = validateCourse(req.body); // result.error  
+    if(error) {
         //400 bad request
         res.status(400).send(result.error.details[0].message);
         return;
@@ -34,22 +31,17 @@ app.post('/api/courses',(req,res)=> {
     res.send(course);
 });
 
-
+// update
 app.put('/api/courses/:id',(req,res)=>{
-    const course = courses.find(c =>
-        c.id === parseInt(req.params.id) 
-                                     )
+    const course = courses.find(c =>c.id === parseInt(req.params.id)                                 )
         if(!course) res.status(404).send('the course not found');//404
          res.send(course);
-   
+      
     
     //  validate
     //  if invalid, return 400 - bad request
-    const schema ={
-        name: Joi.string().min(3).required()
-    };
-    const  result =Joi.validate(req.body,schema);
-    if(result.error) {
+    const { error } = validateCourse(req.body); // result.error  
+    if(error) {
         //400 bad request
         res.status(400).send(result.error.details[0].message);
         return;
@@ -59,7 +51,13 @@ app.put('/api/courses/:id',(req,res)=>{
     //  return the update course 
     res.send(course);
     });
-    
+    function validateCourse(course){
+        const schema ={
+            name: Joi.string().min(3).required()
+        };
+         return Joi.validate(course,schema);
+
+    }
 
 
 
@@ -70,8 +68,18 @@ app.get('/api/courses/:id',(req,res)=>{
    if(!course) res.status(404).send('the course not found');//404
     res.send(course);
 });
-
-
+//Delete
+app.delete('/api/courses/:id',(req,res)=>{
+    // look up the course
+    const course = courses.find(c =>c.id === parseInt(req.params.id)  )
+    // not existing , return 404
+        if(!course) res.status(404).send('the course not found');//404
+    //delete
+  const index =  courses.indexOf(course);
+  courses.splice(index);
+    // return the same course
+    res.send(course);
+});
 
 
 //PORT
